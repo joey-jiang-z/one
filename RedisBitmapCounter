@@ -10,7 +10,7 @@ Redis实现统计网站访问人数的功能
 实现代码如下所示，在main函数中模拟了用户访问的情况。在2019年5月31日有userId为0到14一共15个人访问该网站，而在2019年5月30日有userId为6到14一共9个人访问过该网站：
 统计累计和日均活跃用户人数
 */ 
-public class Counter {
+public class RedisBitmapCounter {
 /**
 ip地址 / 
 private static final String IP_ADDRESS = "192.168.253.129"; 
