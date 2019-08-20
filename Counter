@@ -3,8 +3,12 @@ import java.text.SimpleDateFormat; import java.util.ArrayList; import java.util.
 import org.apache.commons.lang3.StringUtils; import org.apache.commons.lang3.time.DateUtils; import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.BitOP; import redis.clients.jedis.Jedis; import redis.clients.jedis.JedisPool; import redis.clients.jedis.Pipeline;
 /**
+Redis实现统计网站访问人数的功能
+现在想要统计某一网站的累积访问用户人数和日均活跃人数（连续多少天访问该网站的人数），可以通过Redis来实现类似功能。
+笔者使用的数据结构是Redis中的bitmap，其在大数据量下的空间占用量很小。大概思路就是每一位用户都是bitmap中的一位，为1就代表其访问了，为0就代表没访问。比如说现在有5位用户，第1、3位用户访问了，而2、4、5没访问，如果以索引位置作为其userId的话，那么bitmap存储的就是10100。
+累计用户的key设置为“totalKey”，其值为到今天为止所有用户访问的信息，为1就代表其访问过该网站，为0就代表该用户直到今天都没有访问过该网站；日均活跃人数的key设置为“activeKey:[当前的日期]”，比如说2019年5月31日的日均活跃人数key为“activeKey:20190531”，2019年5月30日的日均活跃人数key为“activeKey:20190530”，等等。所以如果要统计日均活跃人数的话，只要将这几个key做交集就可以了（因为只有都为1，相与后结果才为1，如果有一个为0，相与后结果就不是1），然后统计交集结果的1的个数，结果即为统计值。
+实现代码如下所示，在main函数中模拟了用户访问的情况。在2019年5月31日有userId为0到14一共15个人访问该网站，而在2019年5月30日有userId为6到14一共9个人访问过该网站：
 统计累计和日均活跃用户人数
-
 */ 
 public class Counter {
 /**
